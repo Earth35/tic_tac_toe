@@ -4,9 +4,7 @@ class TicTacToe
     @player_1 = Player.new
     @player_2 = Player.new
   end
-  
-  # players - names and marks assigned to players
-  
+
   class Player
     @@player_count = 0;
     @@first_symbol = nil
@@ -28,10 +26,11 @@ class TicTacToe
     
     def get_symbol
       puts "Please choose your mark (O/X):"
-      symbol = gets.chomp.upcase!
+      symbol = get_input
+      puts symbol
       until symbol =~ /^[OX]$/
         puts "Invalid input, O or X only:"
-        symbol = gets.chomp.upcase!
+        symbol = get_input
       end
       @@first_symbol = symbol
       return symbol
@@ -41,9 +40,7 @@ class TicTacToe
       symbol = @@first_symbol == "X" ? "O" : "X"
     end
   end
-  
-  # board class - contents and current state of the game board
-  
+    
   class Board
     attr_accessor :cells, :state
     def initialize
@@ -147,7 +144,7 @@ class TicTacToe
       mark_position(current_player.symbol, board) # place a mark on the board
       print_board(board.state) # print updated board
       if turn > 4
-        if board.check(board.cells) # check if last move ends the game
+        if board.check(board.cells) # check if last move ended the game
           puts "#{current_player.name} wins!"
           break
         end
@@ -157,8 +154,24 @@ class TicTacToe
         break
       end
       turn += 1
-      current_player = current_player == @player_1 ? @player_2 : @player_1
+      current_player = current_player == @player_1 ? @player_2 : @player_1 # swap players
       puts "#{current_player.name}'s turn."
+    end
+  end
+  
+  def play_again
+    loop do
+      puts "Would you like to play again? (Y/N)"
+      user_input = get_input
+      until user_input =~ /^[YN]$/
+        puts "Invalid input"
+        user_input = get_input
+      end
+      if user_input == "Y"
+        self.start
+      else
+        break
+      end
     end
   end
   
@@ -172,10 +185,10 @@ class TicTacToe
   
   def mark_position (symbol, board)
     puts "Which position (a-i) do you want to mark?"
-    coords = gets.chomp.downcase
+    coords = get_input.downcase
     until validate_position(coords, board)
       puts "You can't mark this position. Pick another one:"
-      coords = gets.chomp.downcase
+      coords = get_input.downcase
       validate_position(coords, board)
     end
     puts "Marked position #{coords} with an #{symbol}."
@@ -192,11 +205,10 @@ class TicTacToe
   end
   
   def position_free? (coords, board)
-    free = false
     board.cells.each do |row|
-      free = true if row.include?(coords)
+      return true if row.include?(coords)
     end
-    return free
+    return false
   end
   
   def update_board (board, coords, symbol)
@@ -208,21 +220,13 @@ class TicTacToe
       end
     end
     board.state = board.draw_board(board.cells)
-  end  
+  end
+end
+
+def get_input
+  return gets.chomp.upcase
 end
 
 new_game = TicTacToe.new
 new_game.start
-loop do
-  puts "Would you like to play again? (Y/N)"
-  user_input = gets.chomp.upcase
-  until user_input =~ /^[YN]$/
-    puts "Invalid input"
-    user_input = gets.chomp.upcase
-  end
-  if user_input == "Y"
-    new_game.start
-  else
-    break
-  end
-end
+new_game.play_again
